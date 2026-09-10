@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PHS Hallways">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f2937">
+<link rel="manifest" href="manifest.json">
+<title>Hallways & Class Visits</title>
+
+<style>
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.header {
+  background: #1f2937;
+  color: white;
+  text-align: center;
+  padding: 16px 12px 0;
+  padding-top: calc(16px + env(safe-area-inset-top));
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.tabs {
+  display: flex;
+  background: #1f2937;
+  padding: 10px 12px 0;
+  gap: 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  border: none;
+  border-radius: 8px 8px 0 0;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #f4f6f8;
+  color: #1f2937;
+}
+
+.container {
+  padding: 12px;
+}
+
+.card {
+  background: white;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+label {
+  display: block;
+  margin-top: 14px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+label:first-of-type {
+  margin-top: 4px;
+}
+
+select {
+  width: 100%;
+  padding: 12px 10px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  background: #fff;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.stats {
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  margin: 0 12px 12px;
+  font-size: 15px;
+  line-height: 1.7;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-left: 5px solid #e5e7eb;
+  transition: border-color 0.3s;
+}
+
+.name-color-bar {
+  height: 4px;
+  border-radius: 0 0 6px 6px;
+  background: #e5e7eb;
+  margin-top: 4px;
+  transition: background 0.3s;
+}
+
+.submit-wrap {
+  padding: 0 12px 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+button {
+  width: 100%;
+  padding: 16px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+button:active {
+  background: #1d4ed8;
+}
+
+/* Coverage tab */
+#tab-coverage {
+  display: none;
+  padding: 12px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+.coverage-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.coverage-meta .btn-reset { flex-shrink: 0; }
+
+.coverage-since {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.btn-reset {
+  width: auto;
+  padding: 8px 16px;
+  font-size: 13px;
+  background: #dc2626;
+  border-radius: 8px;
+}
+
+.btn-reset:active {
+  background: #b91c1c;
+}
+
+.progress-card {
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.progress-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.progress-track {
+  position: relative;
+  background: #e5e7eb;
+  border-radius: 8px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #16a34a;
+  border-radius: 8px;
+  transition: width 0.4s ease;
+  min-width: 0;
+}
+
+.progress-target-line {
+  position: absolute;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: #f59e0b;
+  left: 90%;
+}
+
+.progress-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+.target-label {
+  color: #b45309;
+  font-weight: bold;
+}
+
+.grid-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.grid-title {
+  padding: 12px 16px 8px;
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.grid-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.grid-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  width: 100%;
+}
+
+.grid-table th {
+  background: #1f2937;
+  color: white;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+
+.grid-table th.room-col {
+  left: 0;
+  z-index: 2;
+  text-align: left;
+  min-width: 60px;
+}
+
+.grid-table td {
+  padding: 4px 6px;
+  text-align: center;
+  border-bottom: 1px solid #f3f4f6;
+  white-space: nowrap;
+}
+
+.grid-table td.room-name {
+  position: sticky;
+  left: 0;
+  background: white;
+  font-weight: bold;
+  text-align: left;
+  border-right: 1px solid #e5e7eb;
+  z-index: 1;
+  min-width: 60px;
+}
+
+.grid-table tr:last-child td {
+  border-bottom: none;
+}
+
+.cell-visited {
+  background: #bbf7d0;
+  color: #166534;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.cell-visited-high {
+  background: #16a34a;
+  color: white;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.cell-empty {
+  color: #d1d5db;
+}
+
+.floor-header td {
+  background: #f3f4f6;
+  font-weight: bold;
+  font-size: 11px;
+  color: #6b7280;
+  padding: 4px 6px;
+}
+
+.btn-refresh {
+  background: #6b7280;
+  margin-bottom: 0;
+}
+
+.btn-refresh:active {
+  background: #4b5563;
+}
+
+.loading-msg {
+  text-align: center;
+  padding: 24px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Modals */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-box {
+  background: white;
+  padding: 24px 20px;
+  border-radius: 14px;
+  text-align: center;
+  margin: 20px;
+  max-width: 320px;
+  width: 100%;
+}
+
+.modal-box p {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.modal-box button {
+  padding: 14px;
+}
+
+.pin-input {
+  width: 100%;
+  padding: 14px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 8px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  outline: none;
+}
+
+.pin-input:focus {
+  border-color: #2563eb;
+}
+
+.pin-error {
+  color: #dc2626;
+  font-size: 14px;
+  margin: -8px 0 12px;
+  min-height: 20px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-cancel {
+  background: #6b7280;
+}
+
+.btn-cancel:active {
+  background: #4b5563;
+}
+
+/* Period tabs */
+.period-tabs-row {
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0 0 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.period-tab-btn {
+  display: inline-block;
+  padding: 6px 14px;
+  margin-right: 6px;
+  background: #e5e7eb;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+  color: #374151;
+}
+.period-tab-btn.active {
+  background: #1f2937;
+  color: white;
+}
+
+/* Person counts */
+.person-count-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 10px;
+}
+.person-count-row:last-child { border-bottom: none; }
+.person-count-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.person-count-name { flex: 1; font-size: 14px; }
+.person-count-num { font-weight: bold; font-size: 15px; }
+</style>
+</head>
+
+<body>
+
+<div class="header">PHS Hallways & Class Visits</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('log')">Log Visit</button>
+  <button class="tab" onclick="showTab('coverage')">Count</button>
+</div>
+
+<!-- LOG VISIT TAB -->
+<div id="tab-log">
+  <div class="container">
+    <div class="card">
+      <b>Hallways & Class Visits</b>
+
+      <label>Name</label>
+      <select onchange="update('name',this.value)">
+        <option value="">Select</option>
+        <option>Austin Goldberg</option>
+        <option>Carmen Vargas</option>
+        <option>Christian Cabral</option>
+        <option>Christian Zambrano</option>
+        <option>Eudes Budhai</option>
+        <option>Ellen Hackett</option>
+        <option>Janice Reid</option>
+        <option>Jenna Ferris</option>
+        <option>Kern Mojica</option>
+        <option>Margie Daniels</option>
+        <option>Maria OlivierFlores</option>
+        <option>Melanie Roman</option>
+        <option>Melissa Mackhanlall</option>
+        <option>Naima Smith</option>
+      </select>
+      <div class="name-color-bar" id="nameColorBar"></div>
+
+      <label>Time</label>
+      <select onchange="updateTime(this.value)">
+        <option value="">Select</option>
+        <option>Lesson Opening</option>
+        <option>Lesson Closing</option>
+      </select>
+
+      <label>Room</label>
+      <select onchange="update('room',this.value)">
+        <option value="">Select</option>
+        <option>300</option><option>301</option><option>302</option><option>303</option><option>304</option>
+        <option>306</option><option>308</option><option>309</option><option>316</option><option>318</option>
+        <option>320</option><option>322</option><option>324</option>
+        <option>200</option><option>201</option><option>201A</option><option>202</option><option>203</option>
+        <option>204</option><option>206</option><option>207</option><option>208</option><option>209</option>
+        <option>210</option><option>211</option><option>212</option><option>213</option><option>215</option>
+        <option>217</option><option>219</option><option>221</option><option>222</option><option>223</option>
+        <option>224</option><option>225</option><option>226</option><option>227</option><option>228</option>
+        <option>229</option><option>230</option><option>231</option><option>232</option><option>233</option>
+        <option>238</option><option>241</option><option>240</option>
+        <option>101</option><option>102</option><option>103</option><option>105</option><option>106</option><option>107</option>
+        <option>Auditorium</option><option>Gym</option><option>Library Lab</option><option>Library A</option><option>Library B</option>
+      </select>
+
+      <label>Period</label>
+      <select onchange="update('period',this.value)">
+        <option value="">Select</option>
+        <option>Period 1</option>
+        <option>Period 2</option>
+        <option>Period 3</option>
+        <option>Period 4</option>
+        <option>Period 5</option>
+        <option>Period 6</option>
+        <option>Period 7</option>
+        <option>Period 8</option>
+        <option>Period 9</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="stats" id="stats">
+    <b>Please complete all selections:</b><br>
+    Name, Time, Room, and Period
+  </div>
+
+  <div class="submit-wrap">
+    <button onclick="submitData()">Submit</button>
+  </div>
+</div>
+
+<!-- COVERAGE TAB -->
+<div id="tab-coverage">
+  <div id="periodTabs" class="period-tabs-row" style="display:none;"></div>
+
+  <div class="coverage-meta">
+    <div class="coverage-since" id="coverageSince">Loading...</div>
+    <button class="btn-reset" onclick="promptReset()">Reset Coverage</button>
+  </div>
+
+  <div class="progress-card">
+    <div class="progress-label-row">
+      <span><b>Rooms Visited</b></span>
+      <span id="progressCount">0 / 57</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      <div class="progress-target-line"></div>
+    </div>
+    <div class="progress-footer">
+      <span id="progressPct">0%</span>
+      <span class="target-label">90% target</span>
+    </div>
+  </div>
+
+  <div class="grid-card">
+    <div class="grid-title">Room x Period Coverage</div>
+    <div class="grid-scroll">
+      <div class="loading-msg" id="gridLoading">Loading coverage data...</div>
+      <table class="grid-table" id="coverageGrid" style="display:none"></table>
+    </div>
+  </div>
+
+  <button class="btn-refresh" onclick="loadCoverage()">Refresh</button>
+</div>
+
+<!-- Result modal -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <p id="modalText"></p>
+    <button onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<!-- PIN modal -->
+<div class="modal" id="pinModal">
+  <div class="modal-box">
+    <p id="pinTitle"><b>Enter PIN to submit</b></p>
+    <input class="pin-input" id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="----" />
+    <p class="pin-error" id="pinError"></p>
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="closePinModal()">Cancel</button>
+      <button id="pinConfirmBtn" onclick="confirmPin()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxCqO5GLplFCSr3HbIFxyTCofmCfU0qUxqSIB9vloqn1X2ppgENSn48k3lR_bs2trsLOg/exec";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT6-ark8h1lkIivSaO219vUwxEAd1Uo81T7Mqh4Ex9FTBHgRCpUWji1ZmgIRJsKa82VFGNc1gsbwv3P/pub?gid=0&single=true&output=csv";
+const PIN_SUBMIT = "1256";
+const PIN_RESET = "4804";
+
+const PERSON_COLORS = {
+  "Austin Goldberg":    "#fed9b7",
+  "Carmen Vargas":      "#390099",
+  "Christian Cabral":   "#4ade80",
+  "Christian Zambrano": "#15803d",
+  "Eudes Budhai":       "#b0c4b1",
+  "Ellen Hackett":      "#f97316",
+  "Janice Reid":        "#8b5cf6",
+  "Jenna Ferris":       "#fca311",
+  "Kern Mojica":        "#166534",
+  "Margie Daniels":     "#06b6d4",
+  "Maria OlivierFlores":"#ec4899",
+  "Melanie Roman":      "#ecf39e",
+  "Melissa Mackhanlall":"#f43f5e",
+  "Naima Smith":        "#22c55e"
+};
+const PERSON_INITIALS = {
+  "Austin Goldberg":    "AG",
+  "Carmen Vargas":      "CV",
+  "Christian Cabral":   "CC",
+  "Christian Zambrano": "CZ",
+  "Eudes Budhai":       "EB",
+  "Ellen Hackett":      "EH",
+  "Janice Reid":        "JR",
+  "Jenna Ferris":       "JF",
+  "Kern Mojica":        "KM",
+  "Margie Daniels":     "MD",
+  "Maria OlivierFlores":"MO",
+  "Melanie Roman":      "MR",
+  "Melissa Mackhanlall":"MM",
+  "Naima Smith":        "NS"
+};
+
+const PERSON_ORDER = [
+  "Kern Mojica",
+  "Naima Smith",
+  "Christian Zambrano",
+  "Christian Cabral",
+  "Austin Goldberg",
+  "Carmen Vargas",
+  "Eudes Budhai",
+  "Ellen Hackett",
+  "Janice Reid",
+  "Jenna Ferris",
+  "Margie Daniels",
+  "Maria OlivierFlores",
+  "Melanie Roman",
+  "Melissa Mackhanlall"
+];
+
+const ROOMS = [
+  {floor: "3rd Floor", rooms: ['300','301','302','303','304','306','308','309','316','318','320','322','324']},
+  {floor: "2nd Floor", rooms: ['200','201','201A','202','203','204','206','207','208','209','210','211','212','213','215','217','219','221','222','223','224','225','226','227','228','229','230','231','232','233','238','240','241']},
+  {floor: "1st Floor", rooms: ['101','102','103','105','106','107']},
+  {floor: "Other", rooms: ['Auditorium','Gym','Library Lab','Library A','Library B']}
+];
+const ALL_ROOMS = ROOMS.flatMap(f => f.rooms);
+const TOTAL_ROOMS = ALL_ROOMS.length;
+
+const PERIODS = ['Period 1','Period 2','Period 3','Period 4','Period 5','Period 6','Period 7','Period 8','Period 9'];
+const PERIOD_SHORT = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+
+let globalTime = "";
+let data = {name:"", room:"", period:""};
+let lastValid = JSON.parse(JSON.stringify(data));
+let pinMode = "submit";
+let selectedSheet = null; // null = current period, otherwise an "Archive ..." sheet name
+let archiveNames = [];
+
+// Reset used to live in this phone's localStorage only. It now lives in the spreadsheet, so drop the old keys.
+try { localStorage.removeItem('phs_reset_dates'); localStorage.removeItem('phs_reset_date'); } catch (e) {}
+
+// Tab switching
+function showTab(tab) {
+  document.getElementById('tab-log').style.display = tab === 'log' ? 'block' : 'none';
+  document.getElementById('tab-coverage').style.display = tab === 'coverage' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'log') || (i === 1 && tab === 'coverage'));
+  });
+  if (tab === 'coverage') loadCoverage();
+}
+
+// Log Visit logic
+function update(key, value) {
+  if (globalTime === "Closing" && (key === "room" || key === "period")) return;
+  data[key] = value;
+  if (!validate()) {
+    data = JSON.parse(JSON.stringify(lastValid));
+    render();
+  } else {
+    lastValid = JSON.parse(JSON.stringify(data));
+  }
+  updateStats();
+}
+
+function updateTime(value) {
+  globalTime = value;
+  if (!validate()) {
+    globalTime = "";
+    render();
+  }
+  updateStats();
+}
+
+function validate() { return true; }
+
+function updateStats() {
+  const color = PERSON_COLORS[data.name] || '#e5e7eb';
+  const bar = document.getElementById('nameColorBar');
+  bar.style.background = data.name ? color : '#e5e7eb';
+  document.getElementById("stats").style.borderLeftColor = data.name ? color : '#e5e7eb';
+
+  if (data.name && data.room && data.period && globalTime) {
+    document.getElementById("stats").innerHTML = `
+      <b>Current Selection:</b><br><br>
+      <b>Name:</b> <span style="color:${color};font-weight:bold;">${data.name}</span><br>
+      <b>Time:</b> ${globalTime}<br>
+      <b>Room:</b> ${data.room}<br>
+      <b>Period:</b> ${data.period}
+    `;
+  } else {
+    document.getElementById("stats").innerHTML = `
+      <b>Please complete all selections:</b><br>
+      Name, Time, Room, and Period
+    `;
+  }
+}
+
+function render() {
+  const selects = document.querySelectorAll("select");
+  selects[0].value = data.name;
+  selects[2].value = data.room;
+  selects[3].value = data.period;
+}
+
+// Modals
+function showModal(msg) {
+  document.getElementById("modalText").innerText = msg;
+  document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+}
+
+function closePinModal() {
+  document.getElementById("pinModal").style.display = "none";
+  document.getElementById("pinInput").value = "";
+  document.getElementById("pinError").innerText = "";
+}
+
+// Submit flow
+function submitData() {
+  if (!data.name || !data.room || !data.period || !globalTime) {
+    showModal("Please complete all selections before submitting.");
+    return;
+  }
+  pinMode = "submit";
+  document.getElementById("pinTitle").innerHTML = "<b>Enter PIN to submit</b>";
+  document.getElementById("pinConfirmBtn").innerText = "Submit";
+  document.getElementById("pinError").innerText = "";
+  document.getElementById("pinInput").value = "";
+  document.getElementById("pinModal").style.display = "flex";
+  setTimeout(() => document.getElementById("pinInput").focus(), 100);
+}
+
+// Reset flow
+function promptReset() {
+  pinMode = "reset";
+  document.getElementById("pinTitle").innerHTML = "<b>Enter PIN to reset coverage</b>";
+  document.getElementById("pinConfirmBtn").innerText = "Reset";
+  document.getElementById("pinError").innerText = "";
+  document.getElementById("pinInput").value = "";
+  document.getElementById("pinModal").style.display = "flex";
+  setTimeout(() => document.getElementById("pinInput").focus(), 100);
+}
+
+function confirmPin() {
+  const entered = document.getElementById("pinInput").value;
+  const correct = pinMode === "reset" ? PIN_RESET : PIN_SUBMIT;
+  if (entered !== correct) {
+    document.getElementById("pinError").innerText = "Incorrect PIN. Try again.";
+    document.getElementById("pinInput").value = "";
+    return;
+  }
+  closePinModal();
+  if (pinMode === "submit") doSubmit();
+  else if (pinMode === "reset") doReset();
+}
+
+function formatDateTime(date) {
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  }) + ' at ' + date.toLocaleTimeString('en-US', {
+    hour: 'numeric', minute: '2-digit', hour12: true
+  });
+}
+
+function doSubmit() {
+  const now = new Date();
+  const payload = {
+    timestamp: now.toISOString(),
+    name: data.name,
+    time: globalTime,
+    room: data.room,
+    period: data.period
+  };
+
+  fetch(SHEET_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    loadCoverage();
+    showModal(`Submitted!\n\nName: ${data.name}\nTime: ${globalTime}\nRoom: ${data.room}\nPeriod: ${data.period}\n\n${formatDateTime(now)}`);
+  })
+  .catch(() => {
+    showModal("Submission failed. Check your connection and try again.");
+  });
+}
+
+function doReset() {
+  const now = new Date();
+  document.getElementById("coverageSince").innerText = "Resetting...";
+  fetch(SHEET_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ type: "reset", pin: PIN_RESET, timestamp: now.toISOString() })
+  })
+  .then(() => {
+    selectedSheet = null;
+    showModal("Coverage has been reset for everyone.\n\nThe previous visits were saved to a new tab in the spreadsheet, and a new period started " + formatDateTime(now) + ".");
+    // Give Apps Script a moment to finish copying the sheet before re-reading.
+    setTimeout(loadCoverage, 2500);
+  })
+  .catch(() => {
+    showModal("Reset failed. Check your connection and try again.");
+    loadCoverage();
+  });
+}
+
+function archiveLabel(name) {
+  // "Archive 2026-09-08 14.05" -> "Ended Sep 8, 2026"
+  const m = name.match(/^Archive (\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return name;
+  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  return "Ended " + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function buildPeriodTabs() {
+  const container = document.getElementById('periodTabs');
+  if (archiveNames.length === 0) { container.style.display = 'none'; return; }
+  container.style.display = 'block';
+  let html = '';
+  archiveNames.forEach((name, i) => {
+    const active = selectedSheet === name ? 'active' : '';
+    html += `<button class="period-tab-btn ${active}" onclick="selectPeriod(${i})">Period ${i + 1} (${archiveLabel(name)})</button>`;
+  });
+  const currActive = selectedSheet === null ? 'active' : '';
+  html += `<button class="period-tab-btn ${currActive}" onclick="selectPeriod(-1)">Current</button>`;
+  container.innerHTML = html;
+}
+
+function selectPeriod(index) {
+  selectedSheet = index < 0 ? null : archiveNames[index];
+  loadCoverage();
+}
+
+function buildPersonCounts(visits) {
+  const counts = {};
+  visits.forEach(v => {
+    const name = String(v.name || '').trim();
+    if (name) counts[name] = (counts[name] || 0) + 1;
+  });
+  const container = document.getElementById('personCounts');
+  let html = '';
+  PERSON_ORDER.forEach(name => {
+    const count = counts[name] || 0;
+    const color = PERSON_COLORS[name] || '#6b7280';
+    html += `<div class="person-count-row">
+      <div class="person-count-dot" style="background:${color}"></div>
+      <div class="person-count-name">${name}</div>
+      <div class="person-count-num" style="color:${color}">${count}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// Coverage grid
+async function loadCoverage() {
+  document.getElementById("gridLoading").style.display = "";
+  document.getElementById("gridLoading").innerText = "Loading coverage data...";
+  document.getElementById("coverageGrid").style.display = "none";
+  document.getElementById("coverageSince").innerText = "Loading...";
+
+  try {
+    const [meta, visits] = await Promise.all([fetchMeta(), fetchVisits(selectedSheet)]);
+    archiveNames = meta.archives || [];
+    if (selectedSheet && !archiveNames.includes(selectedSheet)) selectedSheet = null;
+    buildPeriodTabs();
+
+    const sinceEl = document.getElementById("coverageSince");
+    if (selectedSheet) {
+      sinceEl.innerText = archiveLabel(selectedSheet) + " (archived)";
+    } else if (meta.since) {
+      sinceEl.innerText = "Since " + formatDateTime(new Date(meta.since));
+    } else if (visits.length > 0) {
+      const earliest = new Date(Math.min(...visits.map(v => new Date(v.timestamp))));
+      sinceEl.innerText = "Since " + formatDateTime(earliest);
+    } else {
+      sinceEl.innerText = "No visits recorded yet";
+    }
+
+    processCoverageData(visits);
+  } catch(err) {
+    document.getElementById("gridLoading").innerText = "Could not load data. Check your connection.";
+    document.getElementById("coverageSince").innerText = "Error";
+  }
+}
+
+// Period start date and list of archived periods. Older Apps Script deployments return an array here; treat that as "no meta".
+async function fetchMeta() {
+  try {
+    const res = await fetch(SHEET_URL + "?meta=1&t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("bad status");
+    const m = await res.json();
+    if (!m || Array.isArray(m)) return { since: "", archives: [] };
+    return m;
+  } catch (e) {
+    return { since: "", archives: [] };
+  }
+}
+
+// Live read from the Apps Script (no publish delay). Falls back to the published CSV.
+async function fetchVisits(sheetName) {
+  try {
+    const q = (sheetName ? "?sheet=" + encodeURIComponent(sheetName) + "&" : "?") + "t=" + Date.now();
+    const res = await fetch(SHEET_URL + q, { cache: "no-store" });
+    if (!res.ok) throw new Error("bad status");
+    const rows = await res.json();
+    if (!Array.isArray(rows)) throw new Error("bad json");
+    return rows
+      .map(raw => {
+        const r = {};
+        Object.keys(raw).forEach(k => r[k.trim().toLowerCase()] = raw[k]);
+        return r;
+      })
+      .map(r => ({
+        timestamp: String(r.timestamp || ""),
+        name: String(r.name || "").trim(),
+        time: String(r.time || ""),
+        room: String(r.room || "").trim(),
+        period: String(r.period || "").trim()
+      }))
+      .filter(r => r.name && r.name !== "RESET" && r.room && r.period);
+  } catch (e) {
+    if (sheetName) return [];
+    const res = await fetch(CSV_URL + "&t=" + Date.now(), { cache: "no-store" });
+    return parseCSV(await res.text());
+  }
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+  return lines.slice(1).map(line => {
+    const cols = line.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = cols[i] || "");
+    return obj;
+  }).filter(r => r.name && r.name !== "RESET" && r.room && r.period);
+}
+
+function processCoverageData(visits) {
+  const coverageMap = {};
+  visits.forEach(v => {
+    const room = String(v.room || "").trim();
+    const period = String(v.period || "").trim();
+    const name = String(v.name || "").trim();
+    if (!room || !period) return;
+    if (!coverageMap[room]) coverageMap[room] = {};
+    if (!coverageMap[room][period]) coverageMap[room][period] = {};
+    coverageMap[room][period][name] = (coverageMap[room][period][name] || 0) + 1;
+  });
+
+  const visitedRooms = ALL_ROOMS.filter(r => coverageMap[r] && Object.keys(coverageMap[r]).length > 0);
+  const pct = Math.round((visitedRooms.length / TOTAL_ROOMS) * 100);
+  document.getElementById("progressCount").innerText = `${visitedRooms.length} / ${TOTAL_ROOMS}`;
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressPct").innerText = pct + "%";
+
+  buildGrid(coverageMap);
+}
+
+function buildGrid(coverageMap) {
+  const table = document.getElementById("coverageGrid");
+
+  let html = "<thead><tr>";
+  html += `<th class="room-col">Room</th>`;
+  PERIOD_SHORT.forEach(p => { html += `<th>${p}</th>`; });
+  html += "</tr></thead><tbody>";
+
+  ROOMS.forEach(floor => {
+    html += `<tr class="floor-header"><td colspan="${PERIODS.length + 1}">${floor.floor}</td></tr>`;
+    floor.rooms.forEach(room => {
+      html += "<tr>";
+      html += `<td class="room-name">${room}</td>`;
+      PERIODS.forEach(period => {
+        const periodData = (coverageMap[room] && coverageMap[room][period]) || {};
+        const visitors = Object.keys(periodData);
+        const totalCount = visitors.reduce((sum, p) => sum + periodData[p], 0);
+        if (totalCount === 0) {
+          html += `<td class="cell-empty">-</td>`;
+        } else if (visitors.length === 1) {
+          const color = PERSON_COLORS[visitors[0]] || '#16a34a';
+          const parts = visitors[0].split(' ');
+          const short = parts[0] + ' ' + parts[parts.length - 1][0] + '.';
+          html += `<td style="background:${color}33;color:${color};font-weight:bold;border-radius:4px;font-size:10px;">${short}${totalCount > 1 ? ' (' + totalCount + ')' : ''}</td>`;
+        } else {
+          const names = visitors.map(p => {
+            const c = PERSON_COLORS[p] || '#16a34a';
+            const parts = p.split(' ');
+            const short = parts[0] + ' ' + parts[parts.length - 1][0] + '.';
+            return `<span style="color:${c};font-weight:bold;">${short}</span>`;
+          }).join('<br>');
+          html += `<td style="background:#f3f4f6;border-radius:4px;font-size:9px;line-height:1.4;">${names}</td>`;
+        }
+      });
+      html += "</tr>";
+    });
+  });
+
+  html += "</tbody>";
+  table.innerHTML = html;
+  document.getElementById("gridLoading").style.display = "none";
+  table.style.display = "";
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+
+</body>
+</html>

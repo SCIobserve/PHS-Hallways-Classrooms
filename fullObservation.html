@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hallways & Class Visits</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+}
+
+.header {
+  background: #1f2937;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  font-size: 18px;
+}
+
+.container {
+  padding: 12px;
+}
+
+.card {
+  background: white;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.stats {
+  background: white;
+  padding: 12px;
+  border-radius: 10px;
+  margin: 12px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">PHS Hallways & Class Visits</div>
+
+<div class="container">
+  <div class="card">
+    <b>Hallways & Class Visits</b>
+
+    <label>Name</label>
+    <select onchange="update('name',this.value)">
+      <option value="">Select</option>
+      <option>Kern Mojica</option>
+      <option>Christial Cabral</option>
+      <option>Naima Smith</option>
+      <option>Christian Zambrano</option>
+      <option>Austin Goldberg</option>
+      <option>Margie Daniels</option>
+
+    </select>
+
+    <label>Time</label>
+    <select onchange="updateTime(this.value)">
+      <option value="">Select</option>
+      <option>Lesson Opening</option>
+      <option>Lesson Middle</option>
+      <option>Lesson Closing</option>
+    </select>
+
+    <label>Room</label>
+    <select onchange="update('room',this.value)">
+      <option value="">Select</option>
+      <option>300</option><option>301</option><option>302</option><option>303</option><option>304</option>
+      <option>306</option><option>308</option><option>309</option><option>316</option><option>318</option>
+      <option>320</option><option>322</option><option>324</option>
+      <option>200</option><option>201</option><option>201A</option><option>202</option><option>203</option>
+      <option>204</option><option>206</option><option>207</option><option>208</option><option>209</option>
+      <option>210</option><option>211</option><option>212</option><option>213</option><option>215</option>
+      <option>217</option><option>219</option><option>221</option><option>222</option><option>223</option>
+      <option>224</option><option>225</option><option>226</option><option>227</option><option>228</option>
+      <option>229</option><option>230</option><option>231</option><option>232</option><option>233</option>
+      <option>238</option><option>241</option><option>240</option>
+      <option>101</option><option>102</option><option>103</option><option>105</option><option>106</option><option>107</option>
+      <option>Auditorium</option><option>Gym</option><option>Library Lab</option><option>Library A</option><option>Library B</option>
+    </select>
+
+    <label>Period</label>
+    <select onchange="update('period',this.value)">
+      <option value="">Select</option>
+      <option>Period 1</option>
+      <option>Period 2</option>
+      <option>Period 3</option>
+      <option>Period 4</option>
+      <option>Period 5</option>
+      <option>Period 6</option>
+      <option>Period 7</option>
+      <option>Period 8</option>
+      <option>Period 9</option>
+    </select>
+
+  </div>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="container">
+  <button onclick="submitData()">Submit</button>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <p id="modalText"></p>
+    <button onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<script>
+let globalTime = "";
+let data = {name:"", room:"", period:""};
+let lastValid = JSON.parse(JSON.stringify(data));
+
+function update(key,value){
+  if(globalTime==="Closing" && (key==="room"||key==="period")) return;
+
+  data[key] = value;
+
+  if(!validate()){
+    data = JSON.parse(JSON.stringify(lastValid));
+    render();
+  } else {
+    lastValid = JSON.parse(JSON.stringify(data));
+  }
+
+  updateStats();
+}
+
+function updateTime(value){
+  globalTime = value;
+
+  if(!validate()){
+    globalTime = "";
+    render();
+  }
+
+  updateStats();
+}
+
+function validate(){
+  return true;
+}
+
+function updateStats(){
+  if(data.name && data.room && data.period && globalTime){
+    document.getElementById("stats").innerHTML = `
+      <b>Current Selection:</b><br><br>
+      <b>Name:</b> ${data.name}<br>
+      <b>Time:</b> ${globalTime}<br>
+      <b>Room:</b> ${data.room}<br>
+      <b>Period:</b> ${data.period}
+    `;
+  } else {
+    document.getElementById("stats").innerHTML = `
+      <b>Please complete all selections:</b><br>
+      Name, Time, Room, and Period
+    `;
+  }
+}
+
+function render(){
+  const selects = document.querySelectorAll("select");
+  selects[0].value = data.name;
+  selects[2].value = data.room;
+  selects[3].value = data.period;
+}
+
+function showModal(msg){
+  document.getElementById("modalText").innerText = msg;
+  document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal(){
+  document.getElementById("modal").style.display = "none";
+}
+
+function submitData(){
+  const now = new Date();
+
+  const record = {
+    time: globalTime,
+    assignment: data,
+    iso: now.toISOString(),
+    local: now.toLocaleString()
+  };
+
+  alert(
+`Submitted!
+
+Name: ${data.name}
+Time: ${globalTime}
+Room: ${data.room}
+Period: ${data.period}
+
+${record.local}`
+  );
+}
+</script>
+
+</body>
+</html>
