@@ -1,4 +1,4 @@
-const CACHE = 'phs-hallways-v7';
+const CACHE = 'phs-hallways-v8';
 const FILES = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
