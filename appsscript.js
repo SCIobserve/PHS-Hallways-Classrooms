@@ -1,5 +1,7 @@
 // Replace your entire Apps Script with this, then Deploy > Manage deployments > Edit > New version.
 //
+// Data lives in the spreadsheet below (SPREADSHEET_ID). The account that deploys this script must have edit access to it.
+//
 // Sheets used:
 //   - The main visits sheet (first sheet that is not "Meta", "Visits by Person", or an "Archive ..." sheet)
 //   - "Visits by Person"  : running counts for the current period
@@ -11,6 +13,7 @@ const PERSON_ORDER = [
   "Naima Smith",
   "Christian Zambrano",
   "Christian Cabral",
+  "Melanie Roman",
   "Austin Goldberg",
   "Carmen Vargas",
   "Eudes Budhai",
@@ -19,12 +22,23 @@ const PERSON_ORDER = [
   "Jenna Ferris",
   "Margie Daniels",
   "Maria OlivierFlores",
-  "Melanie Roman",
   "Melissa Mackhanlall"
 ];
 
+const SPREADSHEET_ID = "1FjEhJsPCJOsYVgH9Z58Qe1tNZ-oqt6XpwLjrbSGt67M";
 const RESET_PIN = "4804";
-const HEADERS = ["Timestamp", "Name", "Time", "Room", "Period"];
+const HEADERS = ["Name", "Time", "Room", "Period"];
+
+function getSpreadsheet() { return SpreadsheetApp.openById(SPREADSHEET_ID); }
+
+// Makes sure row 1 of the visits sheet is exactly HEADERS.
+function ensureHeaders(sheet) {
+  const current = sheet.getLastRow() === 0 ? [] : sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
+  if (current.join("|") !== HEADERS.join("|")) {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
+  }
+}
 
 function isArchiveName(name) { return /^Archive /.test(name); }
 
@@ -82,7 +96,7 @@ function json(obj) {
 //   ?meta=1          -> { since, archives: [names, oldest first] }
 //   ?sheet=NAME      -> rows of that archive sheet
 function doGet(e) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getSpreadsheet();
   const p = (e && e.parameter) || {};
 
   if (p.meta) {
@@ -100,11 +114,11 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getSpreadsheet();
   const sheet = getMainSheet(ss);
   const data = JSON.parse(e.postData.contents);
 
-  if (sheet.getLastRow() === 0) sheet.appendRow(HEADERS);
+  ensureHeaders(sheet);
 
   if (data.type === "reset") {
     if (data.pin !== RESET_PIN) return ContentService.createTextOutput("BAD PIN");
@@ -112,7 +126,7 @@ function doPost(e) {
     return ContentService.createTextOutput("OK");
   }
 
-  sheet.appendRow([data.timestamp, data.name, data.time, data.room, data.period]);
+  sheet.appendRow([data.name, data.time, data.room, data.period]);
   updateVisitsByPerson(ss);
   return ContentService.createTextOutput("OK");
 }
@@ -147,7 +161,7 @@ function updateVisitsByPerson(ss) {
 
   const counts = {};
   for (let i = 1; i < rows.length; i++) {
-    const name = String(rows[i][1] || "").trim();
+    const name = String(rows[i][0] || "").trim();
     if (name && name !== "RESET") counts[name] = (counts[name] || 0) + 1;
   }
 

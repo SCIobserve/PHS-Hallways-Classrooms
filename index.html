@@ -796,7 +796,6 @@ function formatDateTime(date) {
 function doSubmit() {
   const now = new Date();
   const payload = {
-    timestamp: now.toISOString(),
     name: data.name,
     time: globalTime,
     room: data.room,
@@ -905,8 +904,7 @@ async function loadCoverage() {
     } else if (meta.since) {
       sinceEl.innerText = "Since " + formatDateTime(new Date(meta.since));
     } else if (visits.length > 0) {
-      const earliest = new Date(Math.min(...visits.map(v => new Date(v.timestamp))));
-      sinceEl.innerText = "Since " + formatDateTime(earliest);
+      sinceEl.innerText = "Current period";
     } else {
       sinceEl.innerText = "No visits recorded yet";
     }
