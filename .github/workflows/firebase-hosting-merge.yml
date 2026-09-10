@@ -14,6 +14,6 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_[NEW-FIREBASE-PROJECT-ID] }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PHS_HALLWAY_CLASSROOM }}
           channelId: live
-          projectId: [NEW-FIREBASE-PROJECT-ID]
+          projectId: phs-hallway-classroom

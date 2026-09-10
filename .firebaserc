@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "PHS": "phs-hallway-classroom",
+    "default": "phs-hallway-classroom"
+  },
+  "targets": {},
+  "etags": {}
+}
